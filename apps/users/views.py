@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.contrib.auth.hashers import make_password
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, RegisterForm, ForgetpwdForm, ModifyPwdForm
 from .models import UserProfile, EmailVerifyRecord
 from utils.email_send import send_register_email
 
@@ -22,6 +22,50 @@ class CustomBackend(ModelBackend):
             return None
 
 
+class ResetView(View):
+    def get(self, request, active_code):
+        all_records = EmailVerifyRecord.objects.filter(code=active_code)
+        if all_records:
+            for record in all_records:
+                email = record.email
+                return render(request, 'password_reset.html', {'email': email})
+                pass
+        else:
+            return render(request, 'active_fail.html')
+
+
+class ModifyPwdView(View):
+    def post(self, request):
+        modify_form = ModifyPwdForm(request.POST)
+        if modify_form.is_valid():
+            pwd1 = request.POST.get('password', '')
+            pwd2 = request.POST.get('password2', '')
+            email = request.POST.get('email', '')
+
+            if pwd1 == pwd2:
+                user = UserProfile.objects.get(email=email)
+                user.password = make_password(pwd2)
+                user.save()
+                return render(request, 'login.html')
+            return render(request, 'password_reset.html', {'msg': '密码不一致', 'modify_form': modify_form})
+        return render(request, 'password_reset.html', {'msg': '格式不正确', 'modify_form': modify_form})
+
+
+class ForgetpwdView(View):
+    def get(self, request):
+        forgetpwd_form = ForgetpwdForm()
+        return render(request, 'forgetpwd.html', {"forgetpwd_form": forgetpwd_form})
+
+    def post(self, request):
+        forgetpwd_form = ForgetpwdForm(request.POST)
+        if forgetpwd_form.is_valid():
+            email = request.POST.get('email', '')
+            send_register_email(email, 'forget')
+            return render(request, 'send_success.html')
+        else:
+            return render(request, "forgetpwd.html", {"forgetpwd_form": forgetpwd_form})
+
+
 class ActiveUserView(View):
     def get(self, request, active_code):
         all_records = EmailVerifyRecord.objects.filter(code=active_code)
@@ -31,6 +75,8 @@ class ActiveUserView(View):
                 user = UserProfile.objects.get(email=email)
                 user.is_active = True
                 user.save()
+        else:
+            return render(request, 'active_fail.html')
         return render(request, 'login.html')
 
 
@@ -43,6 +89,8 @@ class RegisterView(View):
         register_form = RegisterForm(request.POST)
         if register_form.is_valid():
             user_name = request.POST.get('email', '')
+            if UserProfile.objects.filter(email=user_name):
+                return render(request, 'register.html', {'msg': '用户已注册', 'register_form': register_form})
             pass_word = request.POST.get('password', '')
             user_profile = UserProfile()
             user_profile.username = user_name
@@ -77,38 +125,3 @@ class LoginView(View):
                 return render(request, 'login.html', {'msg': '用户名或密码错误', 'login_form': login_form})
         else:
             return render(request, "login.html", {"login_form": login_form})
-
-#
-# def user_login(request):
-#     if request.method == 'POST':
-#         user_name = request.POST.get('username', '')
-#         pass_word = request.POST.get('password', '')
-#         user = authenticate(username=user_name, password=pass_word)  # 验证数据库中的username和password是否匹配，是则返回对象。否则None
-#         if user is not None:
-#             login(request, user)
-#             return render(request, 'index.html')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#         else:
-#             return render(request, 'login.html', {'msg': '用户名或密码错误'})
-#     elif request.method =='GET':
-#         return render(request, 'login.html', {})
