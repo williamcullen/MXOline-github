@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/MXonline.iml" filepath="$PROJECT_DIR$/.idea/MXonline.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../IMOOC_DjangoAndXadmin_master/.idea/PIMC.iml" filepath="$PROJECT_DIR$/../IMOOC_DjangoAndXadmin_master/.idea/PIMC.iml" />
     </modules>
   </component>
 </project>
