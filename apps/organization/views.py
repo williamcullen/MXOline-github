@@ -4,7 +4,8 @@ from django.views.generic import View
 from django.http import HttpResponse
 from pure_pagination import Paginator, PageNotAnInteger
 from organization.form import UserAskForm
-from .models import CourseOrg, CityDict
+from .models import CourseOrg, CityDict, Teacher
+from courses.models import Course
 
 
 class OrgView(View):
@@ -69,3 +70,75 @@ class AddUserAskView(View):
             return HttpResponse('{"status":"success"}', content_type='application/json')
         else:
             return HttpResponse('{"status":"fail", "msg": "添加出错"}', content_type='application/json')
+
+
+class OrgHomeView(View):
+    '''
+    机构首页
+    '''
+
+    def get(self, request, org_id):
+        current_page = 'home'
+        course_org = CourseOrg.objects.get(id=int(org_id))
+        all_courses = course_org.course_set.all()[:3]
+        course_teachers = course_org.teacher_set.all()[:1]
+        return render(request, 'org-detail-homepage.html', {
+            'all_courses': all_courses,
+            'course_teachers': course_teachers,
+            'course_org': course_org,
+            'current_page': current_page,
+        })
+
+
+class OrgCourseView(View):
+    '''
+    机构课程
+    '''
+
+    def get(self, request, org_id):
+        current_page = 'course'
+        course_org = CourseOrg.objects.get(id=int(org_id))
+        all_courses = course_org.course_set.all()
+        # 对课程进行分页
+        try:
+            page = request.GET.get('page', 1)
+        except PageNotAnInteger:
+            page = 1
+        p = Paginator(all_courses, 4, request=request)
+        course_num = p.page(page)
+        return render(request, 'org-detail-course.html', {
+            'all_courses': all_courses,
+            'course_org': course_org,
+            'course_num': course_num,
+            'current_page': current_page,
+        })
+
+
+class OrgDescView(View):
+    '''
+    机构介绍
+    '''
+
+    def get(self, request, org_id):
+        current_page = 'desc'
+        course_org = CourseOrg.objects.get(id=int(org_id))
+        return render(request, 'org-detail-desc.html', {
+            'course_org': course_org,
+            'current_page': current_page,
+        })
+
+
+class OrgTeacherView(View):
+    '''
+    机构讲师
+    '''
+
+    def get(self, request, org_id):
+        course_org = CourseOrg.objects.get(id=int(org_id))
+        current_page = 'teacher'
+        teacher_org = course_org.teacher_set.all()
+        return render(request, 'org-detail-teachers.html', {
+            'teacher_org': teacher_org,
+            'current_page': current_page,
+            'course_org': course_org,
+        })
