@@ -266,7 +266,7 @@
             success: function (data) {
                 if (data.status == 'fail') {
                     if (data.msg == '用户未登录') {
-                        window.location.href = "/login/";
+                        window.location.href = "{% url "login" %}";
                     } else {
                         current_elem.text(data.msg)
                     }

@@ -12,7 +12,7 @@
     {% block custom_css %}{% endblock %}
     <script src="{% static 'js/jquery.min.js' %}" type="text/javascript"></script>
     <script src="{% static 'js/jquery-migrate-1.2.1.min.js' %}" type="text/javascript"></script>
-    {% block custom_js %}{% endblock %}
+
 </head>
 <body>
 
@@ -91,9 +91,9 @@
                 <div class="nav">
                     <div class="wp">
                         <ul>
-                            <li class="active"><a href="index.html">首页</a></li>
+                            <li class="active"><a href="{% url 'index' %}">首页</a></li>
                             <li>
-                                <a href="course-list.html">
+                                <a href="{% url 'course:course_list' %}">
                                     公开课<img class="hot" src="/static/images/nav_hot.png">
                                 </a>
                             </li>
@@ -462,7 +462,7 @@
 <script src="{% static 'js/unslider.js" type="text/javascript' %}"></script>
 <script src="{% static 'js/plugins/jquery.scrollLoading.js' %}" type="text/javascript"></script>
 <script src="{% static 'js/deco-common.js' %}" type="text/javascript"></script>
-
+{% block custom_js %}{% endblock %}
 
 </body>
 </html>

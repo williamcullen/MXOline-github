@@ -20,7 +20,7 @@ class OrgView(View):
         # 授课机构排名
         hot_orgs = all_orgs.order_by('-click_num')[0:5]
 
-        # 按学习人数排序
+        # 按学习人数,课程数排序
         sort = request.GET.get('sort', '')
         if sort:
             if sort == 'students':
@@ -118,9 +118,8 @@ class OrgCourseView(View):
         p = Paginator(all_courses, 4, request=request)
         course_num = p.page(page)
         return render(request, 'org-detail-course.html', {
-            'all_courses': all_courses,
+            'all_courses': course_num,
             'course_org': course_org,
-            'course_num': course_num,
             'current_page': current_page,
             'has_fav': has_fav,
         })
